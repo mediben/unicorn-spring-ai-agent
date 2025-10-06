@@ -9,6 +9,7 @@ import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryReposito
 import org.springframework.ai.chat.memory.repository.jdbc.PostgresChatMemoryRepositoryDialect;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +30,7 @@ public class ChatController {
 	private final ChatClient chatClient;
 	private final VectorStore vectorStore;
 
-	public ChatController (ChatClient.Builder chatClient, DataSource dataSource, VectorStore vectorStore){
+	public ChatController (ChatClient.Builder chatClient, DataSource dataSource, VectorStore vectorStore, ToolCallbackProvider tools){
 		var chatMemoryRepository = JdbcChatMemoryRepository.builder()
 			.dataSource(dataSource)
 			.dialect(new PostgresChatMemoryRepositoryDialect())
@@ -48,6 +49,7 @@ public class ChatController {
 				MessageChatMemoryAdvisor.builder(chatMemory).build(),
 				QuestionAnswerAdvisor.builder(vectorStore).build())
             .defaultTools(new DateTimeTools(), new WeatherTools())
+			.defaultToolCallbacks(tools)
 			.build();
 	}
 
